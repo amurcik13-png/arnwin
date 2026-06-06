@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -223,7 +222,15 @@
         }
         function startCrashPolling(){fetchCrashState();crashPollInterval=setInterval(fetchCrashState,500)}
         function stopCrashPolling(){if(crashPollInterval)clearInterval(crashPollInterval)}
-        function fetchCrashState(){try{tg.sendData(JSON.stringify({action:'getCrashState'}))}catch(e){}}
+        async function fetchCrashState() {
+    try {
+        const res = await fetch('http://localhost:5000/crash?t=' + Date.now());
+        const data = await res.json();
+        updateCrashState(data);
+    } catch(e) {
+        console.log('Ждём сервер...');
+    }
+}
         function updateCrashState(data){
             round.phase=data.phase||'waiting';round.mult=data.mult||1;round.crashPoint=data.crash_point||0;
             round.timer=data.timer||5;round.roundNum=data.round_num||0;round.bets=data.bets||[];round.history=data.history||[];
