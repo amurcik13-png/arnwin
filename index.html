@@ -266,14 +266,18 @@
         function updateHistory(){document.getElementById('crashHistory').innerHTML=(round.history||[]).map(v=>`<div class="history-dot ${v<1.5?'low':v<3?'mid':'high'}">${v.toFixed(1)}x</div>`).join('')}
         function crashAct(){if(round.phase==='flying'&&round.myBet>0)cashoutCrash();else placeCrashBet()}
         function placeCrashBet(){
-            const bet=parseInt(document.getElementById('crashBet').value)||100;
-            if(bet>bal())return toast('Недостаточно!','error');
-            if(round.phase==='flying')return toast('Раунд уже идёт!','error');
-            round.myBet=bet;round.cashed=false;round.myAuto=parseFloat(document.getElementById('crashAuto').value)||2;
-            round.autoEnabled=document.getElementById('autoCashoutCheck').checked;dec(bet);
-            try{tg.sendData(JSON.stringify({action:'crashBet',amount:bet,auto:round.autoEnabled?round.myAuto:0}))}catch(e){}
-            document.getElementById('crashBtn').textContent='СТАВКА АКТИВНА';document.getElementById('crashBtn').disabled=true;
-        }
+    const bet=parseInt(document.getElementById('crashBet').value)||100;
+    if(bet>bal())return toast('Недостаточно!','error');
+    if(round.phase==='flying')return toast('Раунд уже идёт!','error');
+    round.myBet=bet;round.cashed=false;
+    round.myAuto=parseFloat(document.getElementById('crashAuto').value)||2;
+    round.autoEnabled=document.getElementById('autoCashoutCheck').checked;
+    dec(bet);
+    // Отправляем ставку боту
+    try{tg.sendData(JSON.stringify({action:'crashBet',amount:bet}))}catch(e){}
+    document.getElementById('crashBtn').textContent='СТАВКА АКТИВНА';
+    document.getElementById('crashBtn').disabled=true;
+}
         function cashoutCrash(){
             if(!round.myBet||round.cashed)return;round.cashed=true;
             try{tg.sendData(JSON.stringify({action:'crashCashout'}))}catch(e){}
