@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARNWIN CASINO</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        /* ========== ВСЕ ТВОИ СТИЛИ БЕЗ ИЗМЕНЕНИЙ ========== */
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Inter',sans-serif; }
+        :root {
+            --bg-primary:#0a0a0a; --bg-secondary:#111111;
+            --surface:rgba(30,30,40,0.7); --surface-light:rgba(40,40,50,0.8);
+            --border:rgba(255,255,255,0.15); --text-primary:#ffffff;
+            --text-secondary:#cccccc; --accent:#ffffff;
+            --success:#00ffaa; --warning:#ffcc00; --danger:#ff3366;
+            --radius:32px; --transition:all 0.3s ease; --nav-height:90px;
+            --glass-bg:rgba(255,255,255,0.08); --glass-border:rgba(255,255,255,0.2);
+            --glow:0 0 30px rgba(255,255,255,0.1);
+        }
+        body {
+            background:radial-gradient(ellipse at top,#1a1a2e 0%,#0a0a0a 70%);
+            color:var(--text-primary); min-height:100vh;
+            padding-bottom:var(--nav-height); overflow-x:hidden; position:relative;
+        }
+        .bg-animation { position:fixed; top:0; left:0; width:100%; height:100%; z-index:-1; opacity:0.3; pointer-events:none; }
+        .bg-circle { position:absolute; border-radius:50%; background:radial-gradient(circle,rgba(100,100,255,0.1) 0%,transparent 70%); animation:float 20s infinite linear; }
+        .bg-circle:nth-child(1) { width:300px; height:300px; top:10%; left:10%; animation-delay:0s; }
+        .bg-circle:nth-child(2) { width:400px; height:400px; top:60%; left:80%; animation-delay:5s; }
+        .bg-circle:nth-child(3) { width:200px; height:200px; top:80%; left:20%; animation-delay:10s; }
+        @keyframes float { 0%,100%{transform:translate(0,0) rotate(0deg)} 25%{transform:translate(50px,50px) rotate(90deg)} 50%{transform:translate(0,100px) rotate(180deg)} 75%{transform:translate(-50px,50px) rotate(270deg)} }
+        .container { max-width:1200px; margin:0 auto; padding:20px; }
+        .glass { background:var(--glass-bg); backdrop-filter:blur(20px); border:1px solid var(--glass-border); border-radius:var(--radius); box-shadow:var(--glow); }
+        .notification { position:fixed; top:30px; left:50%; transform:translateX(-50%) translateY(-30px); padding:22px 30px; border-radius:20px; z-index:1000; opacity:0; transition:var(--transition); display:flex; align-items:center; gap:15px; max-width:500px; font-size:1.1rem; font-weight:600; backdrop-filter:blur(20px); }
+        .notification.show { opacity:1; transform:translateX(-50%) translateY(0); }
+        .notification.success { background:rgba(0,255,170,0.15); border:1px solid rgba(0,255,170,0.3); color:var(--success); }
+        .notification.error { background:rgba(255,51,102,0.15); border:1px solid rgba(255,51,102,0.3); color:var(--danger); }
+        .notification.info { background:rgba(100,100,255,0.15); border:1px solid rgba(100,100,255,0.3); color:#aaccff; }
+        .notification-icon { font-size:1.5rem; }
+        .header { display:flex; justify-content:space-between; align-items:center; padding:25px 0; margin-bottom:25px; }
+        .logo { font-size:2rem; font-weight:900; color:var(--text-primary); letter-spacing:-2px; text-shadow:0 0 20px rgba(255,255,255,0.3); }
+        .balance-container { display:flex; align-items:center; gap:20px; padding:15px 25px; min-width:200px; border-radius:var(--radius); cursor:pointer; }
+        .balance-icon { color:var(--success); font-size:1.5rem; }
+        .balance-info { display:flex; flex-direction:column; }
+        .balance-text { font-size:0.8rem; color:var(--text-secondary); font-weight:500; margin-bottom:3px; }
+        .balance-amount { font-size:1.6rem; font-weight:800; color:var(--text-primary); }
+        .game-layout { display:flex; flex-direction:column; gap:25px; }
+        .history-main-container { padding:25px; border-radius:var(--radius); margin-bottom:0; }
+        .history-main-title { font-size:1.2rem; margin-bottom:15px; font-weight:700; color:var(--text-primary); display:flex; align-items:center; gap:12px; }
+        .history-main-scroll { width:100%; overflow-x:auto; padding:10px 0; }
+        .history-main-scale { display:flex; gap:3px; height:60px; min-width:min-content; }
+        .history-main-item { flex-shrink:0; width:70px; border-radius:16px; transition:var(--transition); position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; font-weight:800; font-size:1rem; padding:8px; cursor:pointer; }
+        .history-main-item:hover { transform:translateY(-5px); }
+        .history-main-item.low { background:linear-gradient(135deg,rgba(255,51,102,0.3) 0%,rgba(255,51,102,0.1) 100%); border:1px solid rgba(255,51,102,0.3); }
+        .history-main-item.medium { background:linear-gradient(135deg,rgba(255,204,0,0.3) 0%,rgba(255,204,0,0.1) 100%); border:1px solid rgba(255,204,0,0.3); }
+        .history-main-item.high { background:linear-gradient(135deg,rgba(0,255,170,0.3) 0%,rgba(0,255,170,0.1) 100%); border:1px solid rgba(0,255,170,0.3); }
+        .history-main-item.very-high { background:linear-gradient(135deg,rgba(0,255,170,0.5) 0%,rgba(0,255,170,0.2) 100%); border:1px solid rgba(0,255,170,0.5); animation:glow 2s infinite alternate; }
+        .game-canvas-container { padding:30px; border-radius:var(--radius); position:relative; overflow:hidden; min-height:350px; display:flex; align-items:center; justify-content:center; background:rgba(10,10,20,0.5); }
+        #gameCanvas { width:100%; height:300px; position:relative; }
+        .graph-lines { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; }
+        .graph-line { position:absolute; width:100%; height:1px; background:rgba(255,255,255,0.05); }
+        .multiplier-display { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:5rem; font-weight:900; z-index:10; transition:var(--transition); text-shadow:0 0 40px rgba(255,255,255,0.3); }
+        .multiplier-display.increase { animation:pulse 1.5s infinite; }
+        .center-timer { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:4rem; font-weight:900; z-index:10; color:var(--text-primary); opacity:0; transition:var(--transition); text-shadow:0 0 30px rgba(255,255,255,0.3); }
+        .center-timer.show { opacity:1; }
+        .game-status { position:absolute; bottom:20px; left:20px; padding:12px 20px; font-weight:600; border-radius:20px; z-index:10; font-size:0.9rem; backdrop-filter:blur(10px); border:1px solid var(--glass-border); background:rgba(255,255,255,0.05); }
+        .timer { position:absolute; bottom:20px; right:20px; padding:12px 20px; font-weight:600; border-radius:20px; z-index:10; font-size:0.9rem; backdrop-filter:blur(10px); border:1px solid var(--glass-border); background:rgba(255,255,255,0.05); }
+        .bet-controls { padding:25px; border-radius:var(--radius); }
+        .bet-title { font-size:1.3rem; margin-bottom:20px; font-weight:700; color:var(--text-primary); display:flex; align-items:center; gap:12px; }
+        .bet-title i { color:var(--success); }
+        .bet-input-container { margin-bottom:20px; }
+        .bet-label { display:block; margin-bottom:10px; color:var(--text-secondary); font-size:0.9rem; font-weight:500; }
+        .bet-input-wrapper { display:flex; align-items:center; margin-bottom:10px; }
+        .bet-input { flex:1; background:rgba(255,255,255,0.05); border:1px solid var(--border); border-radius:20px 0 0 20px; color:var(--text-primary); padding:16px 20px; font-size:1.3rem; font-weight:700; outline:none; transition:var(--transition); }
+        .bet-input:focus { border-color:var(--success); background:rgba(255,255,255,0.08); }
+        .bet-currency { background:rgba(255,255,255,0.05); border:1px solid var(--border); border-left:none; color:var(--text-primary); padding:16px 20px; border-radius:0 20px 20px 0; font-weight:700; font-size:1.3rem; }
+        .bet-quick-buttons { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin-bottom:20px; }
+        .bet-quick-btn { padding:14px 5px; background:rgba(255,255,255,0.05); border:1px solid var(--border); border-radius:16px; color:var(--text-secondary); font-weight:700; cursor:pointer; transition:var(--transition); text-align:center; font-size:1rem; }
+        .bet-quick-btn:hover { background:rgba(255,255,255,0.1); border-color:var(--success); color:var(--text-primary); transform:translateY(-3px); }
+        .auto-cashout-container { margin-bottom:20px; padding:20px; border-radius:20px; border:1px solid var(--border); background:rgba(255,255,255,0.03); }
+        .auto-cashout-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:15px; }
+        .auto-cashout-label { display:flex; align-items:center; gap:12px; font-weight:700; font-size:1rem; }
+        .auto-cashout-checkbox { width:22px; height:22px; accent-color:var(--success); cursor:pointer; }
+        .auto-cashout-input-wrapper { display:flex; align-items:center; gap:12px; }
+        .auto-cashout-input { flex:1; background:rgba(255,255,255,0.05); border:1px solid var(--border); border-radius:16px; color:var(--text-primary); padding:14px; font-size:1.2rem; font-weight:700; outline:none; text-align:center; transition:var(--transition); }
+        .auto-cashout-input:focus { border-color:var(--success); }
+        .auto-cashout-x { font-weight:700; font-size:1.2rem; color:var(--text-primary); }
+        .action-button { width:100%; padding:22px; border-radius:var(--radius); color:var(--text-primary); font-size:1.5rem; font-weight:800; cursor:pointer; transition:var(--transition); margin-bottom:20px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; backdrop-filter:blur(20px); border:2px solid var(--glass-border); background:rgba(255,255,255,0.08); }
+        .action-button:hover:not(:disabled) { background:rgba(255,255,255,0.12); border-color:var(--success); transform:translateY(-5px); box-shadow:0 15px 40px rgba(0,255,170,0.2); }
+        .action-button.pulse { animation:pulse-glow 2s infinite; border-color:var(--success); }
+        .action-button:disabled { opacity:0.7; cursor:not-allowed; border-color:var(--border); }
+        .button-main-text { font-size:1.5rem; font-weight:800; }
+        .bet-multiplier { font-size:1.1rem; font-weight:700; color:var(--text-secondary); }
+        .bet-win-amount { font-size:1.3rem; font-weight:800; color:var(--success); }
+        .potential-win { text-align:center; color:var(--text-secondary); font-size:0.9rem; }
+        .potential-win-value { font-size:1.5rem; font-weight:800; color:var(--text-primary); margin-top:6px; }
+        .nav-container { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); z-index:100; padding:12px 25px; width:auto; min-width:250px; max-width:350px; backdrop-filter:blur(30px); border:1px solid var(--glass-border); background:rgba(255,255,255,0.08); border-radius:var(--radius); box-shadow:0 10px 30px rgba(0,0,0,0.3); }
+        .nav-tabs { display:flex; justify-content:space-around; gap:15px; }
+        .nav-tab { display:flex; flex-direction:column; align-items:center; padding:10px 18px; border-radius:20px; cursor:pointer; transition:var(--transition); color:var(--text-secondary); min-width:80px; }
+        .nav-tab:hover { background:rgba(255,255,255,0.05); }
+        .nav-tab.active { background:rgba(255,255,255,0.12); color:var(--text-primary); border:1px solid var(--glass-border); transform:translateY(-3px); }
+        .nav-tab i { font-size:1.4rem; margin-bottom:4px; }
+        .nav-tab span { font-weight:700; font-size:0.9rem; }
+        .rocket-container { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:5; }
+        .rocket { position:absolute; font-size:4rem; transform:translate(-50%,-50%); transition:left 0.1s linear,top 0.1s linear; z-index:20; filter:drop-shadow(0 0 20px rgba(0,255,255,0.5)); animation:rocket-shake 0.3s infinite; }
+        @keyframes rocket-shake { 0%,100%{transform:translate(-50%,-50%) rotate(0deg)} 25%{transform:translate(-50%,-50%) rotate(1deg)} 75%{transform:translate(-50%,-50%) rotate(-1deg)} }
+        .particle { position:absolute; border-radius:50%; pointer-events:none; z-index:10; }
+        .explosion { position:absolute; border-radius:50%; pointer-events:none; transform:translate(-50%,-50%); background:radial-gradient(circle,rgba(255,100,100,0.8) 0%,transparent 70%); z-index:15; }
+        @keyframes pulse { 0%{transform:translate(-50%,-50%) scale(1)} 50%{transform:translate(-50%,-50%) scale(1.05)} 100%{transform:translate(-50%,-50%) scale(1)} }
+        @keyframes pulse-glow { 0%{box-shadow:0 0 0 0 rgba(0,255,170,0.4)} 70%{box-shadow:0 0 0 20px rgba(0,255,170,0)} 100%{box-shadow:0 0 0 0 rgba(0,255,170,0)} }
+        @keyframes glow { from{box-shadow:0 0 20px rgba(0,255,170,0.4)} to{box-shadow:0 0 40px rgba(0,255,170,0.8)} }
+        .tab-content { display:none; }
+        .tab-content.active { display:block; }
+        .mines-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin:16px 0; }
+        .mine-cell { aspect-ratio:1; background:rgba(255,255,255,0.05); border:1px solid var(--border); border-radius:12px; cursor:pointer; font-size:1.5rem; display:flex; align-items:center; justify-content:center; transition:0.1s; }
+        .mine-cell:active { transform:scale(0.93); }
+        .towers-row { display:flex; gap:6px; margin:6px 0; align-items:center; }
+        .towers-cell { width:44px; height:44px; background:rgba(255,255,255,0.05); border:1px solid var(--border); border-radius:10px; cursor:pointer; font-size:1.2rem; display:flex; align-items:center; justify-content:center; transition:0.1s; }
+        .towers-cell:active { transform:scale(0.93); }
+        .towers-mult { width:50px; text-align:right; font-weight:700; font-size:0.85rem; color:var(--text-secondary); }
+        .info-row { display:flex; justify-content:space-between; color:var(--text-secondary); font-size:0.9rem; padding:6px 0; }
+        .info-row span { color:var(--text-primary); font-weight:600; }
+        .game-back { display:flex; align-items:center; gap:12px; margin-bottom:16px; }
+        .game-back-btn { background:var(--glass-bg); border:1px solid var(--glass-border); color:var(--text-primary); width:36px; height:36px; border-radius:50%; cursor:pointer; font-size:1rem; display:flex; align-items:center; justify-content:center; }
+        .game-title { font-weight:700; font-size:1.3rem; }
+        .games-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:10px; }
+        .game-card { background:var(--glass-bg); border:1px solid var(--glass-border); border-radius:var(--radius); padding:24px 16px; cursor:pointer; transition:0.2s; text-align:center; backdrop-filter:blur(10px); }
+        .game-card:active { border-color:var(--success); transform:scale(0.97); }
+        .game-card .icon { font-size:3rem; margin-bottom:10px; }
+        .game-card .name { font-weight:700; font-size:1.1rem; }
+        .game-card .desc { color:var(--text-secondary); font-size:0.8rem; margin-top:4px; }
+        @media(max-width:768px) {
+            .header { flex-direction:column; align-items:flex-start; gap:20px; }
+            .balance-container { width:100%; justify-content:space-between; min-width:auto; padding:14px 20px; }
+            .multiplier-display { font-size:3.5rem; }
+            .center-timer { font-size:3rem; }
+            .bet-quick-buttons { grid-template-columns:repeat(3,1fr); }
+            .nav-container { width:90%; min-width:auto; padding:10px 18px; }
+            .nav-tab { min-width:auto; padding:8px 12px; }
+            .container { padding:15px; }
+            .logo { font-size:1.8rem; }
+            .action-button { padding:18px; font-size:1.3rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"><div class="bg-circle"></div><div class="bg-circle"></div><div class="bg-circle"></div></div>
+    <div class="notification" id="notification"><i class="fas fa-check-circle notification-icon"></i><div class="notification-text"></div></div>
+
+    <div class="container">
+        <div class="header">
+            <div class="logo">🎰 ARNWIN</div>
+            <div class="balance-container glass" onclick="switchBalance()">
+                <i class="fas fa-coins balance-icon"></i>
+                <div class="balance-info">
+                    <div class="balance-text" id="balanceLabel">❄️ Снежинки</div>
+                    <div class="balance-amount" id="balDisplay">1000</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ИГРЫ -->
+        <div id="tab-games" class="tab-content active">
+            <div class="games-grid">
+                <div class="game-card" onclick="openGame('crash')"><div class="icon">🚀</div><div class="name">CRASH</div><div class="desc">Забери до взрыва</div></div>
+                <div class="game-card" onclick="openGame('mines')"><div class="icon">💣</div><div class="name">МИНЫ</div><div class="desc">Поле 5×5</div></div>
+                <div class="game-card" onclick="openGame('towers')"><div class="icon">🗼</div><div class="name">БАШНИ</div><div class="desc">6 этажей</div></div>
+            </div>
+            <div style="margin-top:20px"><h3 style="margin-bottom:8px">👤 Профиль</h3>
+                <div class="info-row"><span>Игр:</span><span id="statGames">0</span></div>
+                <div class="info-row"><span>Лучший x:</span><span id="statBest">x0</span></div>
+                <div class="info-row"><span>Оборот:</span><span id="statBet">0</span></div>
+                <div class="info-row"><span>Выигрышей:</span><span id="statWin">0</span></div>
+            </div>
+        </div>
+
+        <!-- CRASH -->
+        <div id="tab-crash" class="tab-content">
+            <div class="game-back"><button class="game-back-btn" onclick="openGame('games')">←</button><div class="game-title">🚀 CRASH</div></div>
+            <div class="history-main-container glass"><div class="history-main-title"><i class="fas fa-chart-line"></i>История</div><div class="history-main-scroll"><div class="history-main-scale" id="crashHistory"></div></div></div>
+            <div class="game-canvas-container glass">
+                <div id="gameCanvas"><div class="graph-lines" id="graphLines"></div><div class="multiplier-display">1.00x</div><div class="center-timer" id="centerTimer">5.0</div><div class="game-status">Ставки принимаются</div><div class="timer">5.0</div></div>
+                <div class="rocket-container" id="rocketContainer"></div>
+            </div>
+            <div class="bet-controls glass">
+                <div class="bet-title"><i class="fas fa-money-bill-wave"></i>Ставка</div>
+                <div class="bet-input-container"><label class="bet-label">Сумма</label><div class="bet-input-wrapper"><input type="number" class="bet-input" id="crashBet" value="100" min="10" step="10"><div class="bet-currency">❄️</div></div></div>
+                <div class="bet-quick-buttons">
+                    <div class="bet-quick-btn" onclick="setCrashBet(100)">+100</div><div class="bet-quick-btn" onclick="setCrashBet(500)">+500</div>
+                    <div class="bet-quick-btn" onclick="setCrashBet('half')">1/2</div><div class="bet-quick-btn" onclick="setCrashBet('double')">x2</div>
+                    <div class="bet-quick-btn" onclick="setCrashBet('max')">МАКС</div>
+                </div>
+                <div class="auto-cashout-container"><div class="auto-cashout-header"><label class="auto-cashout-label"><input type="checkbox" class="auto-cashout-checkbox" id="autoCashoutCheckbox">Авто-вывод</label></div>
+                    <div class="auto-cashout-input-wrapper"><input type="number" class="auto-cashout-input" id="autoCashoutInput" value="2" min="1.1" step="0.1"><div class="auto-cashout-x">x</div></div></div>
+                <button id="crashActionBtn" class="action-button glass" onclick="crashAction()"><span class="button-main-text">СДЕЛАТЬ СТАВКУ</span><span class="bet-multiplier" id="betMultiplier"></span><span class="bet-win-amount" id="betWinAmount"></span></button>
+                <div class="potential-win">Потенциальный выигрыш:<br><div class="potential-win-value" id="potentialWin">100 ❄️</div></div>
+            </div>
+        </div>
+
+        <!-- МИНЫ -->
+        <div id="tab-mines" class="tab-content">
+            <div class="game-back"><button class="game-back-btn" onclick="openGame('games')">←</button><div class="game-title">💣 МИНЫ</div></div>
+            <div class="bet-controls glass" style="margin-bottom:16px">
+                <div class="bet-quick-buttons" style="grid-template-columns:repeat(4,1fr)">
+                    <div class="bet-quick-btn" onclick="setMines(3)">3💣</div><div class="bet-quick-btn" onclick="setMines(5)">5💣</div>
+                    <div class="bet-quick-btn" onclick="setMines(10)">10💣</div><div class="bet-quick-btn" onclick="setMines(15)">15💣</div>
+                </div>
+                <div class="bet-input-wrapper"><input type="number" class="bet-input" id="minesBet" value="100" min="10" step="10"><div class="bet-currency">❄️</div></div>
+                <div class="info-row">Множитель: <span id="minesMult">x1.00</span> | След: <span id="minesNext">x1.16</span></div>
+            </div>
+            <div class="mines-grid" id="minesGrid"></div>
+            <button id="minesActionBtn" class="action-button glass" onclick="minesAction()"><span class="button-main-text">НАЧАТЬ ИГРУ</span></button>
+        </div>
+
+        <!-- БАШНИ -->
+        <div id="tab-towers" class="tab-content">
+            <div class="game-back"><button class="game-back-btn" onclick="openGame('games')">←</button><div class="game-title">🗼 БАШНИ</div></div>
+            <div class="bet-controls glass" style="margin-bottom:16px">
+                <div class="bet-quick-buttons" style="grid-template-columns:repeat(3,1fr)">
+                    <div class="bet-quick-btn" onclick="setTowers(1)">1💣</div><div class="bet-quick-btn" onclick="setTowers(2)">2💣</div>
+                    <div class="bet-quick-btn" onclick="setTowers(3)">3💣</div>
+                </div>
+                <div class="bet-input-wrapper"><input type="number" class="bet-input" id="towersBet" value="100" min="10" step="10"><div class="bet-currency">❄️</div></div>
+                <div class="info-row">Множитель: <span id="towersMult">x1.00</span> | След: <span id="towersNext">x1.19</span></div>
+            </div>
+            <div id="towersBoard"></div>
+            <button id="towersActionBtn" class="action-button glass" onclick="towersAction()"><span class="button-main-text">НАЧАТЬ ИГРУ</span></button>
+        </div>
+    </div>
+
+    <!-- НАВИГАЦИЯ -->
+    <div class="nav-container glass">
+        <div class="nav-tabs">
+            <div class="nav-tab active" data-tab="games" onclick="openGame('games')"><i class="fas fa-gamepad"></i><span>ИГРЫ</span></div>
+            <div class="nav-tab" data-tab="profile" onclick="openGame('profile')"><i class="fas fa-user"></i><span>ПРОФИЛЬ</span></div>
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp; tg.expand(); tg.ready();
+        const user = tg.initDataUnsafe?.user || { id: 'test', first_name: 'Игрок' };
+        
+        let balance = 1000, bonusBal = 100, useBonus = false;
+        let stats = { games: 0, bestX: 0, totalBet: 0, totalWin: 0 };
+        
+        // Crash
+        let crash = { bet:0, mult:1, phase:'waiting', crashPoint:1, autoCashout:2, history:[], timer:5, interval:null, active:false };
+        const crashSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-rocket-whoosh-1094.mp3');
+        
+        // Mines
+        let mines = { bet:0, bombs:3, grid:[], revealed:[], playing:false, mult:1 };
+        const minesMults = {
+            3:[1.01,1.16,1.33,1.55,1.8,2.13,2.51,3.03,3.68,4.52,5.66,7.19,9.36,12.48,17.16,24.51,36.77,58.83,102.99,205.98,514.96,2059.39],
+            5:[1.05,1.28,1.58,1.99,2.55,3.34,4.45,6.07,8.48,12.15,17.88,27.11,42.58,69.32,117.53,208.45,387.27,755.39,1558.93,3400.21,7929.82],
+            10:[1.15,1.45,1.88,2.5,3.4,4.8,7.0,10.5,16.5,27,46,82,152,295,600,1280,2850,6700,16500,43000,120000],
+            15:[1.3,1.8,2.5,3.6,5.5,8.5,14,24,42,78,150,300,650,1500,3800,10000,30000,100000]
+        };
+        
+        // Towers
+        let towers = { bet:0, mines:1, floor:0, minePositions:[], playing:false, mult:1, picks:[] };
+        const towersMults = { 1:[1,1.19,1.42,1.86,2.32,2.9,3.52], 2:[1,1.58,2.64,4.4,7.33,10.38,15.8], 3:[1,2,4,7.5,13,22,38] };
+
+        function updateUI() {
+            document.getElementById('balDisplay').textContent = Math.floor(useBonus ? bonusBal : balance);
+            document.getElementById('balanceLabel').textContent = useBonus ? '🎁 Бонусный' : '❄️ Снежинки';
+            document.getElementById('statGames').textContent = stats.games;
+            document.getElementById('statBest').textContent = 'x'+stats.bestX.toFixed(1);
+            document.getElementById('statBet').textContent = Math.floor(stats.totalBet);
+            document.getElementById('statWin').textContent = Math.floor(stats.totalWin);
+        }
+
+        function switchBalance() { useBonus = !useBonus; updateUI(); }
+
+        function toast(msg, type) {
+            const t = document.getElementById('notification');
+            t.querySelector('.notification-text').textContent = msg;
+            t.className = 'notification ' + type + ' show';
+            setTimeout(() => t.classList.remove('show'), 2500);
+        }
+
+        function getBal() { return useBonus ? bonusBal : balance; }
+        function deduct(amt) { if(useBonus) bonusBal-=amt; else balance-=amt; stats.totalBet+=amt; stats.games++; updateUI(); }
+        function addWin(amt) { if(useBonus) bonusBal+=amt; else balance+=amt; stats.totalWin+=amt; updateUI(); }
+
+        function openGame(game) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            const map = { games:'tab-games', crash:'tab-crash', mines:'tab-mines', towers:'tab-towers', profile:'tab-games' };
+            const tabId = map[game] || 'tab-games';
+            document.getElementById(tabId).classList.add('active');
+            if (game === 'games' || game === 'profile') {
+                document.querySelector('.nav-tab[data-tab="games"]').classList.add('active');
+            }
+            if (game === 'crash' && crash.phase === 'waiting') startCrashRound();
+            if (game === 'mines' && !mines.playing) drawMinesGrid();
+            if (game === 'towers' && !towers.playing) drawTowersBoard();
+        }
+
+        // ===== CRASH =====
+        function setCrashBet(v) {
+            const inp = document.getElementById('crashBet');
+            const max = Math.min(getBal(), 50000);
+            if (v === 'half') inp.value = Math.max(10, Math.floor(parseInt(inp.value)/2));
+            else if (v === 'double') inp.value = Math.min(max, parseInt(inp.value)*2);
+            else if (v === 'max') inp.value = max;
+            else inp.value = Math.min(max, parseInt(inp.value) + v);
+        }
+
+        function crashAction() {
+            if (crash.phase === 'flying' && crash.active) cashOutCrash();
+            else placeCrashBet();
+        }
+
+        function placeCrashBet() {
+            const bet = parseInt(document.getElementById('crashBet').value) || 100;
+            crash.autoCashout = parseFloat(document.getElementById('autoCashoutInput').value) || 2;
+            if (bet > getBal()) return toast('Недостаточно средств!', 'error');
+            if (crash.phase === 'flying' || crash.phase === 'countdown') {
+                if (crash.active) return toast('Уже есть ставка!', 'error');
+                crash.bet = bet; crash.active = true; deduct(bet);
+                document.getElementById('crashActionBtn').disabled = true;
+                document.getElementById('crashActionBtn').querySelector('.button-main-text').textContent = 'В ОЧЕРЕДИ';
+                return;
+            }
+            crash.bet = bet; crash.active = true; deduct(bet);
+            document.getElementById('crashActionBtn').disabled = true;
+            document.getElementById('crashActionBtn').querySelector('.button-main-text').textContent = 'СТАВКА АКТИВНА';
+        }
+
+        function cashOutCrash() {
+            const win = Math.floor(crash.bet * crash.mult);
+            addWin(win); if (crash.mult > stats.bestX) stats.bestX = crash.mult;
+            crash.bet = 0; crash.active = false;
+            document.getElementById('crashActionBtn').disabled = false;
+            document.getElementById('crashActionBtn').querySelector('.button-main-text').textContent = 'СДЕЛАТЬ СТАВКУ';
+            toast('🎉 Выигрыш: +'+win+' ❄️', 'success');
+        }
+
+        function startCrashRound() {
+            crash.phase = 'countdown'; crash.mult = 1; crash.timer = 5;
+            crash.crashPoint = 1 + Math.random()*4 + (Math.random()>0.9 ? Math.random()*20 : 0);
+            document.querySelector('.multiplier-display').textContent = '1.00x';
+            document.querySelector('.game-status').textContent = '🎯 Готовься...';
+            if (crash.interval) clearInterval(crash.interval);
+            crash.interval = setInterval(() => {
+                if (crash.phase === 'countdown') {
+                    crash.timer -= 0.1;
+                    document.querySelector('.multiplier-display').textContent = crash.timer > 0 ? crash.timer.toFixed(1) : '🚀';
+                    document.querySelector('.timer').textContent = crash.timer.toFixed(1);
+                    if (crash.timer <= 0) {
+                        crash.phase = 'flying';
+                        crashSound.play();
+                        document.getElementById('crashActionBtn').disabled = false;
+                        document.getElementById('crashActionBtn').querySelector('.button-main-text').textContent = '💰 ЗАБРАТЬ';
+                        document.querySelector('.game-status').textContent = '🚀 Полёт!';
+                    }
+                } else if (crash.phase === 'flying') {
+                    crash.mult += 0.05;
+                    if (crash.mult >= crash.crashPoint) {
+                        crash.mult = crash.crashPoint; crash.phase = 'crashed';
+                        crash.history.unshift(crash.mult); if (crash.history.length > 10) crash.history.pop();
+                        updateCrashHistory();
+                        document.querySelector('.multiplier-display').textContent = crash.mult.toFixed(2)+'x';
+                        document.querySelector('.multiplier-display').style.color = 'var(--danger)';
+                        document.querySelector('.game-status').textContent = '💥 КРАХ!';
+                        if (crash.active) { crash.bet = 0; crash.active = false; toast('💥 Крах!', 'error'); }
+                        document.getElementById('crashActionBtn').disabled = false;
+                        document.getElementById('crashActionBtn').querySelector('.button-main-text').textContent = 'СДЕЛАТЬ СТАВКУ';
+                        setTimeout(() => { crash.phase = 'waiting'; startCrashRound(); }, 3000);
+                    } else {
+                        document.querySelector('.multiplier-display').textContent = crash.mult.toFixed(2)+'x';
+                        if (crash.mult < 1.5) document.querySelector('.multiplier-display').style.color = 'var(--danger)';
+                        else if (crash.mult < 3) document.querySelector('.multiplier-display').style.color = 'var(--warning)';
+                        else document.querySelector('.multiplier-display').style.color = 'var(--success)';
+                        if (crash.active && crash.mult >= crash.autoCashout) cashOutCrash();
+                    }
+                }
+            }, 100);
+        }
+
+        function updateCrashHistory() {
+            document.getElementById('crashHistory').innerHTML = crash.history.map(v => 
+                `<div class="history-main-item ${v<1.5?'low':v<3?'medium':'high'}">${v.toFixed(1)}x</div>`).join('');
+        }
+
+        // ===== МИНЫ =====
+        function setMines(n) { mines.bombs = n; if (!mines.playing) { drawMinesGrid(); updateMinesInfo(); } }
+        
+        function updateMinesInfo() {
+            const safe = mines.revealed.filter(c => !mines.grid.includes(c)).length;
+            const tbl = minesMults[mines.bombs] || minesMults[3];
+            mines.mult = safe === 0 ? 1 : tbl[Math.min(safe, tbl.length-1)];
+            document.getElementById('minesMult').textContent = 'x'+mines.mult.toFixed(2);
+            document.getElementById('minesNext').textContent = 'x'+(tbl[Math.min(safe+1, tbl.length-1)]).toFixed(2);
+        }
+
+        function drawMinesGrid() {
+            const g = document.getElementById('minesGrid'); g.innerHTML = '';
+            for (let i = 0; i < 25; i++) {
+                const cell = document.createElement('div'); cell.className = 'mine-cell';
+                if (mines.revealed.includes(i)) {
+                    cell.textContent = mines.grid.includes(i) ? '💣' : '⭐';
+                } else {
+                    cell.textContent = '▫️';
+                    if (mines.playing) cell.onclick = () => minesClick(i);
+                }
+                g.appendChild(cell);
+            }
+        }
+
+        function minesAction() {
+            if (mines.playing) {
+                const win = Math.floor(mines.bet * mines.mult); addWin(win);
+                if (mines.mult > stats.bestX) stats.bestX = mines.mult;
+                toast('Забрал: +'+win+' ❄️', 'success');
+                mines.playing = false; mines.grid = []; mines.revealed = [];
+                drawMinesGrid();
+                document.getElementById('minesActionBtn').querySelector('.button-main-text').textContent = 'НАЧАТЬ ИГРУ';
+            } else {
+                const bet = parseInt(document.getElementById('minesBet').value) || 100;
+                if (bet > getBal()) return toast('Недостаточно средств!', 'error');
+                mines.bet = bet; deduct(bet); mines.playing = true; mines.revealed = [];
+                const avail = Array.from({length:25},(_,i)=>i); mines.grid = [];
+                for (let i = 0; i < Math.min(mines.bombs, 24); i++) {
+                    mines.grid.push(avail.splice(Math.floor(Math.random()*avail.length), 1)[0]);
+                }
+                updateMinesInfo(); drawMinesGrid();
+                document.getElementById('minesActionBtn').querySelector('.button-main-text').textContent = '💰 ЗАБРАТЬ';
+            }
+        }
+
+        function minesClick(i) {
+            if (!mines.playing || mines.revealed.includes(i)) return;
+            mines.revealed.push(i);
+            if (mines.grid.includes(i)) {
+                toast('💣 Мина! -'+mines.bet+' ❄️', 'error');
+                mines.playing = false;
+                document.getElementById('minesActionBtn').querySelector('.button-main-text').textContent = 'НАЧАТЬ ИГРУ';
+            }
+            updateMinesInfo(); drawMinesGrid();
+            const safe = mines.revealed.filter(c => !mines.grid.includes(c)).length;
+            if (safe === 25 - mines.grid.length) {
+                const win = Math.floor(mines.bet * mines.mult); addWin(win);
+                toast('Все звёзды! +'+win+' ❄️', 'success');
+                mines.playing = false;
+                document.getElementById('minesActionBtn').querySelector('.button-main-text').textContent = 'НАЧАТЬ ИГРУ';
+            }
+        }
+
+        // ===== БАШНИ =====
+        function setTowers(n) { towers.mines = n; if (!towers.playing) { drawTowersBoard(); updateTowersInfo(); } }
+        
+        function updateTowersInfo() {
+            const tbl = towersMults[towers.mines] || towersMults[1];
+            towers.mult = tbl[towers.floor];
+            document.getElementById('towersMult').textContent = 'x'+towers.mult.toFixed(2);
+            document.getElementById('towersNext').textContent = 'x'+(towers.floor<6 ? tbl[towers.floor+1].toFixed(2) : '-');
+        }
+
+        function drawTowersBoard() {
+            const b = document.getElementById('towersBoard'); b.innerHTML = '';
+            const tbl = towersMults[towers.mines] || towersMults[1];
+            for (let f = 0; f < 6; f++) {
+                const row = document.createElement('div'); row.className = 'towers-row';
+                const ms = document.createElement('span'); ms.className = 'towers-mult'; ms.textContent = 'x'+tbl[f+1].toFixed(2);
+                row.appendChild(ms);
+                for (let i = 0; i < 5; i++) {
+                    const cell = document.createElement('div'); cell.className = 'towers-cell';
+                    if (f < towers.floor) {
+                        const pk = towers.picks.find(p => p.f === f);
+                        cell.textContent = pk && pk.s === i ? '⭐' : towers.minePositions[f]?.includes(i) ? '💣' : '▫️';
+                    } else if (f === towers.floor && towers.playing) {
+                        cell.textContent = '🎯'; cell.onclick = () => towersClick(i);
+                    } else { cell.textContent = ' '; }
+                    row.appendChild(cell);
+                }
+                b.appendChild(row);
+            }
+        }
+
+        function towersAction() {
+            if (towers.playing) {
+                const win = Math.floor(towers.bet * towers.mult); addWin(win);
+                if (towers.mult > stats.bestX) stats.bestX = towers.mult;
+                toast('Забрал: +'+win+' ❄️', 'success');
+                towers.playing = false; towers.floor = 0; towers.picks = [];
+                drawTowersBoard();
+                document.getElementById('towersActionBtn').querySelector('.button-main-text').textContent = 'НАЧАТЬ ИГРУ';
+            } else {
+                const bet = parseInt(document.getElementById('towersBet').value) || 100;
+                if (bet > getBal()) return toast('Недостаточно средств!', 'error');
+                towers.bet = bet; deduct(bet); towers.playing = true; towers.floor = 0; towers.picks = [];
+                towers.minePositions = [];
+                for (let f = 0; f < 6; f++) {
+                    const avail = Array.from({length:5},(_,i)=>i); const fm = [];
+                    for (let m = 0; m < Math.min(towers.mines, 4); m++) fm.push(avail.splice(Math.floor(Math.random()*avail.length), 1)[0]);
+                    towers.minePositions.push(fm);
+                }
+                updateTowersInfo(); drawTowersBoard();
+                document.getElementById('towersActionBtn').querySelector('.button-main-text').textContent = '💰 ЗАБРАТЬ';
+            }
+        }
+
+        function towersClick(i) {
+            if (!towers.playing) return;
+            const safe = !towers.minePositions[towers.floor].includes(i);
+            towers.picks.push({ f: towers.floor, s: i, ok: safe });
+            if (!safe) {
+                toast('💣 Мина! -'+towers.bet+' ❄️', 'error');
+                towers.playing = false; towers.floor = 0;
+                document.getElementById('towersActionBtn').querySelector('.button-main-text').textContent = 'НАЧАТЬ ИГРУ';
+            } else {
+                towers.floor++;
+                if (towers.floor === 6) {
+                    const win = Math.floor(towers.bet * towers.mult); addWin(win);
+                    toast('Башня покорена! +'+win+' ❄️', 'success');
+                    towers.playing = false; towers.floor = 0;
+                    document.getElementById('towersActionBtn').querySelector('.button-main-text').textContent = 'НАЧАТЬ ИГРУ';
+                }
+            }
+            updateTowersInfo(); drawTowersBoard();
+        }
+
+        // Инит
+        updateUI(); drawMinesGrid(); drawTowersBoard(); startCrashRound();
+    </script>
+</body>
+</html>
