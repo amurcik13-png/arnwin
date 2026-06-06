@@ -224,7 +224,7 @@
         function stopCrashPolling(){if(crashPollInterval)clearInterval(crashPollInterval)}
         async function fetchCrashState() {
     try {
-        const res = await fetch('http://localhost:5000/crash?t=' + Date.now());
+        const res = await fetch('https://shakira-containing-auditor-ant.trycloudflare.com/crash?t=' + Date.now());
         const data = await res.json();
         updateCrashState(data);
     } catch(e) {
