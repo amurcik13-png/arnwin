@@ -220,7 +220,7 @@
             document.getElementById('profName').textContent=user.first_name||'Игрок';
             document.getElementById('profId').textContent=user.id;updateUI();
         }
-        function startCrashPolling(){fetchCrashState();crashPollInterval=setInterval(fetchCrashState,500)}
+        function startCrashPolling(){fetchCrashState();crashPollInterval=setInterval(fetchCrashState,100)}
         function stopCrashPolling(){if(crashPollInterval)clearInterval(crashPollInterval)}
         async function fetchCrashState() {
     try {
