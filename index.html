@@ -224,7 +224,7 @@
         function stopCrashPolling(){if(crashPollInterval)clearInterval(crashPollInterval)}
         async function fetchCrashState() {
     try {
-        const res = await fetch('https://aberdeen-called-restricted-frame.trycloudflare.com/crash?t=' + Date.now());
+        const res = await fetch('https://columbus-gratis-dealt-carter.trycloudflare.com/crash?t=' + Date.now());
         const data = await res.json();
         updateCrashState(data);
     } catch(e) {
@@ -274,7 +274,7 @@
     round.autoEnabled=document.getElementById('autoCashoutCheck').checked;
     dec(bet);
     
-    fetch('https://aberdeen-called-restricted-frame.trycloudflare.com/bet', {
+    fetch('https://columbus-gratis-dealt-carter.trycloudflare.com/bet', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({user_id: user.id, name: user.first_name||'Игрок', amount: bet, photo: user.photo_url||''})
